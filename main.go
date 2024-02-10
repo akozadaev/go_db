@@ -7,8 +7,8 @@ import (
 )
 
 type Product struct {
-	//gorm.Model
-	ID    uint `gorm:"primarykey"`
+	gorm.Model
+	//ID    uint `gorm:"primarykey"`
 	Name  string
 	Price uint
 }
@@ -50,7 +50,18 @@ func main() {
 
 		fmt.Println(name)
 	}
-	// Delete - delete product
+	//Только для Артура
+	type Result struct {
+		ID    int
+		Name  string
+		Price uint
+	}
+	var result Result
+	db.Raw("SELECT id, name, price FROM products WHERE id = ?", 1).Scan(&result)
+	fmt.Println(result.Name)
+	//Только для Артура
+
+	//Delete - delete product
 	db.Delete(&product, 1)
 	db.Delete(&product, "name = ?", "Мороженка")
 
