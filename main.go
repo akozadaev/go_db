@@ -1,12 +1,14 @@
 package main
 
 import (
+	"fmt"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
 
 type Product struct {
-	gorm.Model
+	//gorm.Model
+	ID    uint `gorm:"primarykey"`
 	Name  string
 	Price uint
 }
@@ -34,7 +36,22 @@ func main() {
 	db.Model(&product).Updates(Product{Price: 202, Name: "Мороженка"}) // non-zero fields
 	db.Model(&product).Updates(map[string]interface{}{"Price": 203, "Name": "Мороженка1"})
 
+	sql := db.ToSQL(func(tx *gorm.DB) *gorm.DB {
+		return tx.Model(&Product{}).Where("id = ?", 1).Limit(10).Order("id desc").Find(&[]Product{})
+	})
+
+	fmt.Println(sql)
+
+	var name any
+	rows, err := db.Model(&Product{}).Where("name = ?", "Мороженка1").Select("name").Rows()
+	defer rows.Close()
+	for rows.Next() {
+		rows.Scan(&name)
+
+		fmt.Println(name)
+	}
 	// Delete - delete product
 	db.Delete(&product, 1)
 	db.Delete(&product, "name = ?", "Мороженка")
+
 }
